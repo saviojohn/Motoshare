@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import Link from "next/link";
+import { useRouter } from 'next/router'
+import { getDatabase, ref, child, push, update } from "firebase/database";
+
 
 const CustomerForm = () => {
   const [name, setName] = useState("");
@@ -8,6 +10,23 @@ const CustomerForm = () => {
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [address, setAddress] = useState("");
+  const router = useRouter();
+
+  function submitData(e) {
+    e.preventDefault();
+    const customer = {name, email, phone, gender, address};
+    const db = getDatabase();
+
+    let newPostKey = push(child(ref(db), 'posts')).key;
+
+    let updates = {};
+    updates['/customers/' + newPostKey] = customer;
+
+    return update(ref(db), updates).then( () => {
+      window.alert("Registration Completed");
+      router.push("/nextcustomerpage");
+    }).catch(error => console.error(error));
+  }
 
   return (
     <>
@@ -16,7 +35,7 @@ const CustomerForm = () => {
       </Head>
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold mb-4">Customer Form</h1>
-        <form className="max-w-md mx-auto">
+        <form className="max-w-md mx-auto" onSubmit={submitData}>
           <div className="mb-4">
             <label htmlFor="name" className="block font-medium mb-2">
               Name
@@ -80,14 +99,9 @@ const CustomerForm = () => {
               onChange={(e) => setAddress(e.target.value)}
             ></textarea>
           </div>
-          <div className="flex justify-center">
-            <Link
-              href="/nextcustomerpage"
-              className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
-            >
+          <button type="submit" className="flex justify-center bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600">
               Submit
-            </Link>
-          </div>
+          </button>
         </form>
       </div>
     </>
