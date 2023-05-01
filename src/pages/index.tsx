@@ -9,11 +9,10 @@ const SelectUserType = () => {
       <Head>
         <title>Select User Type</title>
       </Head>
-      <h1 className="text-3xl font-bold mb-8">Select User Type</h1>
       <div className="flex flex-col md:flex-row gap-4">
         <Link href="/driver">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-            Driver
+          <button className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">
+            Bike Registration
           </button>
         </Link>
         <Link href="/customer">

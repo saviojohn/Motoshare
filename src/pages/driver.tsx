@@ -1,84 +1,83 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-const DriverForm = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [gender, setGender] = useState("");
-  const [address, setAddress] = useState("");
+const BikeDetailsForm = () => {
+  const [bikeModel, setBikeModel] = useState("");
+  const [bikeType, setBikeType] = useState("");
+  const [nocFile, setNocFile] = useState<FileList | null>(null);
+  const [rcFile, setRcFile] = useState<FileList | null>(null);
+  const [dlFile, setDlFile] = useState<FileList | null>(null);
+
+  const handleNocFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setNocFile(event.target.files);
+  };
+
+  const handleRcFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setRcFile(event.target.files);
+  };
+
+  const handleDlFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDlFile(event.target.files);
+  };
 
   return (
     <>
       <Head>
-        <title>Driver Form</title>
+        <title>Bike Details Form</title>
       </Head>
       <div className="container mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-4">Driver Form</h1>
+        <h1 className="text-3xl font-bold mb-4">Bike Details Form</h1>
         <form className="max-w-md mx-auto">
           <div className="mb-4">
-            <label htmlFor="name" className="block font-medium mb-2">
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block font-medium mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="phone" className="block font-medium mb-2">
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="gender" className="block font-medium mb-2">
-              Gender
+            <label htmlFor="bikeType" className="block font-medium mb-2">
+              Bike Type
             </label>
             <select
-              id="gender"
+              id="bikeType"
               className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               defaultValue=""
-              onChange={(e) => setGender(e.target.value)}
+              onChange={(e) => setBikeType(e.target.value)}
             >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="">Select Bike Type</option>
+              <option value="electric">Electric Bike / Scooty</option>
+              <option value="scooty">Scooty</option>
+              <option value="normal">Normal Bike</option>
             </select>
           </div>
           <div className="mb-4">
-            <label htmlFor="address" className="block font-medium mb-2">
-              Address
+            <label htmlFor="bikeModel" className="block font-medium mb-2">
+              Bike Model
             </label>
-            <textarea
-              id="address"
+            <input
+              id="bikeModel"
+              type="text"
               className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            ></textarea>
+              value={bikeModel}
+              onChange={(e) => setBikeModel(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="nocFile" className="block font-medium mb-2">
+              NOC Document
+            </label>
+            <input
+              id="nocFile"
+              type="file"
+              className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              onChange={handleNocFileChange}
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="rcFile" className="block font-medium mb-2">
+              RC Document
+            </label>
+            <input
+              id="rcFile"
+              type="file"
+              className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              onChange={handleRcFileChange}
+            />
           </div>
           <div className="flex justify-center">
             <Link
@@ -94,4 +93,4 @@ const DriverForm = () => {
   );
 };
 
-export default DriverForm;
+export default BikeDetailsForm;

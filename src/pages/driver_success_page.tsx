@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
-import { MapContainer, TileLayer, Marker, Popup, MapContainerProps } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  MapContainerProps,
+} from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 
 const DriverSuccessPage = () => {
@@ -11,8 +17,7 @@ const DriverSuccessPage = () => {
     useState<LatLngExpression | null>(null);
 
   useEffect(() => {
-    // Use browser's geolocation API to get the current location of the user
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         setDriverLocation([
           position.coords.latitude,
@@ -26,12 +31,21 @@ const DriverSuccessPage = () => {
 
     // Set the customer location
     setCustomerLocation([37.3821168339051, -122.07830467821675]); // Replace with actual customer location
+
+    // Clean up the watchPosition when the component unmounts
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   const mapProps: MapContainerProps = {
     center: driverLocation as LatLngExpression,
     zoom: 13,
-    style: { height: "100%", width: "100%" }
+    style: { height: "400px", width: "100%" },
+  };
+
+  const handleReset = () => {
+    setDriverLocation(null);
   };
 
   return (
@@ -54,9 +68,11 @@ const DriverSuccessPage = () => {
           {driverLocation && (
             <MapContainer {...mapProps}>
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={driverLocation}>
-                <Popup>Your location</Popup>
-              </Marker>
+              {driverLocation && (
+                <Marker position={driverLocation}>
+                  <Popup>Your location</Popup>
+                </Marker>
+              )}
               {customerLocation && (
                 <Marker position={customerLocation}>
                   <Popup>Customer location</Popup>
@@ -64,6 +80,9 @@ const DriverSuccessPage = () => {
               )}
             </MapContainer>
           )}
+          <button className="absolute bottom-4 right-4" onClick={handleReset}>
+            Reset
+          </button>
         </div>
       </div>
     </>
