@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import "tailwindcss/tailwind.css";
 
+
 const SelectUserType = () => {
   return (
     <div className="flex flex-col justify-center items-center h-screen">

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import { getDatabase, ref, child, push, update } from "firebase/database";
-
 
 const CustomerForm = () => {
   const [name, setName] = useState("");
@@ -12,20 +11,22 @@ const CustomerForm = () => {
   const [address, setAddress] = useState("");
   const router = useRouter();
 
-  function submitData(e) {
+  function submitData(e: { preventDefault: () => void; }) {
     e.preventDefault();
-    const customer = {name, email, phone, gender, address};
+    const customer = { name, email, phone, gender, address };
     const db = getDatabase();
 
-    let newPostKey = push(child(ref(db), 'posts')).key;
+    let newPostKey = push(child(ref(db), "posts")).key;
 
     let updates = {};
-    updates['/customers/' + newPostKey] = customer;
+    updates["/customers/" + newPostKey] = customer;
 
-    return update(ref(db), updates).then( () => {
-      window.alert("Registration Completed");
-      router.push("/nextcustomerpage");
-    }).catch(error => console.error(error));
+    return update(ref(db), updates)
+      .then(() => {
+        window.alert("Registration Completed");
+        router.push("/nextcustomerpage");
+      })
+      .catch((error) => console.error(error));
   }
 
   return (
@@ -99,8 +100,11 @@ const CustomerForm = () => {
               onChange={(e) => setAddress(e.target.value)}
             ></textarea>
           </div>
-          <button type="submit" className="flex justify-center bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600">
-              Submit
+          <button
+            type="submit"
+            className="flex justify-center bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
+          >
+            Submit
           </button>
         </form>
       </div>
