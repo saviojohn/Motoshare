@@ -18,7 +18,7 @@ const CustomerForm = () => {
 
     let newPostKey = push(child(ref(db), "posts")).key;
 
-    let updates = {};
+    let updates: any = {};
     updates["/customers/" + newPostKey] = customer;
 
     return update(ref(db), updates)
@@ -29,6 +29,9 @@ const CustomerForm = () => {
       .catch((error) => console.error(error));
   }
 
+  function requestRide() {
+    router.push("/nextcustomerpage");
+  }
   return (
     <>
       <Head>
@@ -107,6 +110,9 @@ const CustomerForm = () => {
             Submit
           </button>
         </form>
+        <button
+            className="flex justify-center bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
+            onClick={requestRide}>Los gehts</button>
       </div>
     </>
   );
