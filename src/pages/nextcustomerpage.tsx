@@ -8,6 +8,7 @@ import {
 import "@geoapify/geocoder-autocomplete/styles/minimal.css";
 import L from "leaflet";
 import icon from "./location-icon.png";
+import { addressAutocomplete } from "@/components/location-autocomplete";
 
 interface CustomGeoapifyGeocoderAutocompleteOptions
   extends GeoapifyGeocoderAutocompleteOptions {
@@ -28,31 +29,53 @@ const CustomerLocation = () => {
   const [liveLocation, setLiveLocation] = useState<[number, number]>([
     10.21737, 76.321,
   ]);
+
   const mapRef = useRef<any>();
 
   function onPickupSelect(value: {
     properties: { formatted: any };
-    geometry: { lng: number; lat: number };
+    geometry: { coordinates: number[] };
   }) {
     setPickupLocation({
-      label: value.properties.formatted,
-      coordinates: [value.geometry.lng, value.geometry.lat],
+      label: value?.properties.formatted,
+      coordinates: value?.geometry.coordinates as [number, number],
     });
+    if(!!value) {
+      mapRef.current.setView(
+          [value?.geometry.coordinates[1],value?.geometry.coordinates[0]],
+          13
+      );
+    }
   }
 
   function onDropSelect(value: {
     properties: { formatted: any };
-    geometry: { lng: number; lat: number };
+    geometry: { coordinates: number[] };
   }): void {
     setDropLocation({
-      label: value.properties.formatted,
-      coordinates: [value.geometry.lng, value.geometry.lat],
+      label: value?.properties?.formatted,
+      coordinates: value?.geometry.coordinates as [number, number],
     });
+    if(!!value) {
+      mapRef.current.setView(
+          [value?.geometry.coordinates[1],value?.geometry.coordinates[0]],
+          13
+      );
+    }
   }
 
-  function onRequestClick() {
-    console.log("Request button clicked!");
-    // Add your request code here
+  async function onRequestClick(e: any) {
+    e.preventDefault();
+    const url = `https://api.geoapify.com/v1/routing?waypoints=${dropLocation.coordinates[1]},${dropLocation.coordinates[0]}|${pickupLocation.coordinates[1]},${pickupLocation.coordinates[0]}&mode=drive&apiKey=6f0ae9a14f374257b6700c22d4ec7d92`;
+    console.log(url);
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      //look for showing route here. data object has the properties you need to show route in the map
+      console.log(data.features[0].properties.distance);
+      const distance = data.features[0].properties.distance;
+      window.confirm(`You will be travelling ${distance} metres. This would cost you ${Math.ceil(distance/1000) * 15} INR. Would you like to confirm this ride?`);
+    }
   }
 
   const locationIcon = L.icon({
@@ -67,11 +90,6 @@ const CustomerLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log(
-            "Live location retrieved:",
-            position.coords.latitude,
-            position.coords.longitude
-          );
           setLiveLocation([
             position.coords.latitude,
             position.coords.longitude,
@@ -105,6 +123,17 @@ const CustomerLocation = () => {
     }
   }, [liveLocation]);
 
+  useEffect(() => {
+      addressAutocomplete(document.getElementById("autocomplete-container-pickup"),
+          (data: any) => onPickupSelect(data),
+          {placeholder: "Enter pickup location"});
+
+      addressAutocomplete(document.getElementById("autocomplete-container-drop"),
+          (data: any) => onDropSelect(data),
+          {placeholder: "Enter drop location"});
+
+  }, undefined);
+
   return (
     <>
       <div className="container mx-auto px-4 py-6">
@@ -113,33 +142,13 @@ const CustomerLocation = () => {
             <label htmlFor="pickup" className="block font-medium mb-2">
               Pickup Location
             </label>
-            <GeoapifyContext apiKey="6f0ae9a14f374257b6700c22d4ec7d92">
-              <GeoapifyGeocoderAutocomplete
-                placeholder="Enter pickup location"
-                placeSelect={onPickupSelect}
-                options={{
-                  markerIcon:
-                    "https://img.icons8.com/?size=512&id=67384&format=png",
-                }}
-                {...(Option as CustomGeoapifyGeocoderAutocompleteOptions)}
-              />
-            </GeoapifyContext>
+            <div className="autocomplete-container" id="autocomplete-container-pickup" key={"autocomplete-container-pickup"}></div>
           </div>
           <div className="mb-4 flex flex-col justify-start items-start">
             <label htmlFor="drop" className="block font-medium mb-2">
               Drop Location
             </label>
-            <GeoapifyContext apiKey="6f0ae9a14f374257b6700c22d4ec7d92">
-              <GeoapifyGeocoderAutocomplete
-                placeholder="Enter drop location"
-                placeSelect={onDropSelect}
-                options={{
-                  markerIcon:
-                    "https://img.icons8.com/?size=512&id=67384&format=png",
-                }}
-                {...(Option as CustomGeoapifyGeocoderAutocompleteOptions)}
-              />
-            </GeoapifyContext>
+            <div className="autocomplete-container" id="autocomplete-container-drop" key={"autocomplete-container-drop"}></div>
           </div>
           <div className="mb-4 flex justify-end">
             <button
