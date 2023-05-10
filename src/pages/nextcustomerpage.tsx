@@ -30,37 +30,51 @@ const CustomerLocation = () => {
     10.21737, 76.321,
   ]);
 
-  const [isLocationSelectRendered, setIsLocationSelectRendered] = useState<boolean>(false);
-
   const mapRef = useRef<any>();
 
   function onPickupSelect(value: {
     properties: { formatted: any };
-    geometry: { lng: number; lat: number };
+    geometry: { coordinates: number[] };
   }) {
     setPickupLocation({
-      label: value.properties.formatted,
-      coordinates: [value.geometry.lng, value.geometry.lat],
+      label: value?.properties.formatted,
+      coordinates: value?.geometry.coordinates as [number, number],
     });
-  }
-
-  function boo(val: boolean) {
-    console.log(val);
+    if(!!value) {
+      mapRef.current.setView(
+          [value?.geometry.coordinates[1],value?.geometry.coordinates[0]],
+          13
+      );
+    }
   }
 
   function onDropSelect(value: {
     properties: { formatted: any };
-    geometry: { lng: number; lat: number };
+    geometry: { coordinates: number[] };
   }): void {
     setDropLocation({
-      label: value.properties.formatted,
-      coordinates: [value.geometry.lng, value.geometry.lat],
+      label: value?.properties?.formatted,
+      coordinates: value?.geometry.coordinates as [number, number],
     });
+    if(!!value) {
+      mapRef.current.setView(
+          [value?.geometry.coordinates[1],value?.geometry.coordinates[0]],
+          13
+      );
+    }
   }
 
-  function onRequestClick() {
-    console.log("Request button clicked!");
-    // Add your request code here
+  async function onRequestClick(e: any) {
+    e.preventDefault();
+    const url = `https://api.geoapify.com/v1/routing?waypoints=${dropLocation.coordinates[1]},${dropLocation.coordinates[0]}|${pickupLocation.coordinates[1]},${pickupLocation.coordinates[0]}&mode=drive&apiKey=6f0ae9a14f374257b6700c22d4ec7d92`;
+    console.log(url);
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data.features[0].properties.distance);
+      const distance = data.features[0].properties.distance;
+      window.confirm(`You will be travelling ${distance} metres. This would cost you ${Math.ceil(distance/1000) * 15} INR. Would you like to confirm this ride?`);
+    }
   }
 
   const locationIcon = L.icon({
@@ -75,11 +89,6 @@ const CustomerLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log(
-            "Live location retrieved:",
-            position.coords.latitude,
-            position.coords.longitude
-          );
           setLiveLocation([
             position.coords.latitude,
             position.coords.longitude,
@@ -114,18 +123,14 @@ const CustomerLocation = () => {
   }, [liveLocation]);
 
   useEffect(() => {
-    if(!isLocationSelectRendered) {
-      console.log("blue");
-      setIsLocationSelectRendered(true);
       addressAutocomplete(document.getElementById("autocomplete-container-pickup"),
           (data: any) => onPickupSelect(data),
           {placeholder: "Enter pickup location"});
 
       addressAutocomplete(document.getElementById("autocomplete-container-drop"),
-          (data: any) => onPickupSelect(data),
+          (data: any) => onDropSelect(data),
           {placeholder: "Enter drop location"});
-      setIsLocationSelectRendered(true);
-    }
+
   }, undefined);
 
   return (

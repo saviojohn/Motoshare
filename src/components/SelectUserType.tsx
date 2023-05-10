@@ -1,12 +1,10 @@
-import { Head } from "next/document";
+
 import Link from "next/link";
 
 const SelectUserType = () => {
     return (
       <div className="flex flex-col justify-center items-center h-screen">
-        <Head>
-          <title>Select User Type</title>
-        </Head>
+
         <h1 className="text-3xl font-bold mb-8">Select User Type</h1>
         <div className="flex flex-col md:flex-row gap-4">
         <Link href="/driver">

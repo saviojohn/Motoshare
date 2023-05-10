@@ -6,7 +6,8 @@
   	 - placeholder - placeholder text for an input element
      - type - location type
 */
-export function addressAutocomplete(containerElement, callback, options) {
+// @ts-nocheck
+export function addressAutocomplete(containerElement: any, callback: any, options: any) {
     // create input element
 
     var inputElement = document.createElement("input");
