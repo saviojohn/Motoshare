@@ -71,6 +71,7 @@ const CustomerLocation = () => {
     const response = await fetch(url);
     if (response.ok) {
       const data = await response.json();
+      //look for showing route here. data object has the properties you need to show route in the map
       console.log(data.features[0].properties.distance);
       const distance = data.features[0].properties.distance;
       window.confirm(`You will be travelling ${distance} metres. This would cost you ${Math.ceil(distance/1000) * 15} INR. Would you like to confirm this ride?`);
@@ -141,13 +142,13 @@ const CustomerLocation = () => {
             <label htmlFor="pickup" className="block font-medium mb-2">
               Pickup Location
             </label>
-            <div className="autocomplete-container" id="autocomplete-container-pickup"></div>
+            <div className="autocomplete-container" id="autocomplete-container-pickup" key={"autocomplete-container-pickup"}></div>
           </div>
           <div className="mb-4 flex flex-col justify-start items-start">
             <label htmlFor="drop" className="block font-medium mb-2">
               Drop Location
             </label>
-            <div className="autocomplete-container" id="autocomplete-container-drop"></div>
+            <div className="autocomplete-container" id="autocomplete-container-drop" key={"autocomplete-container-drop"}></div>
           </div>
           <div className="mb-4 flex justify-end">
             <button
