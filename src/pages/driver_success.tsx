@@ -8,40 +8,39 @@ const Driver_successForm = () => {
     {
       navigator.geolocation.getCurrentPosition(updateLocationdb);
     }
-    function updateLocationdb(position)
+
+    function updateLocationdb(position: any)
     {
       const bikeOwnerId = sessionStorage.getItem("currentDriverId");
         const driverlocation = {
-          bikeOwnerId,
-          position
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
         };
         const db = getDatabase();
     
-        let newPostKey = push(child(ref(db), "availableDrivers")).key;
-    
         let updates: any = {};
-        updates["/availableDrivers/" + newPostKey] = driverlocation;
+        updates["/activeDriverLocations/" + bikeOwnerId] = driverlocation;
     
         return update(ref(db), updates)
           .then(() => {
             
           })
-          .catch((error) => console.error(error));
-      }
+          .catch((error) => {
+              console.error(error)
+          });
     }
 
     return (
         <div>
-          <div className="">Hello</div>
           <div>
-            <button
+            <button onClick={offerRides}
               className="w-full flex justify-center py-2 px-4 rounded font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              offerRides
+              Offer Rides
             </button>
           </div>
-          
         </div>
       );
     };
 
+export default Driver_successForm;
