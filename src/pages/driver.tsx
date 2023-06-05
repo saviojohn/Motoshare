@@ -1,27 +1,41 @@
 import React, { useState, ChangeEvent } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import { getDatabase, ref, child, push, update } from "firebase/database";
+import router from "next/router";
 
 const BikeDetailsForm = () => {
   const [bikeOwnerName, setBikeOwnerName] = useState("");
-  const [bikeType, setBikeType] = useState("");
   const [bikeModel, setBikeModel] = useState("");
-  const [aadhaarFile, setAadhaarFile] = useState<FileList | null>(null);
-  const [rcFile, setRcFile] = useState<FileList | null>(null);
-  const [nocFile, setNocFile] = useState<FileList | null>(null);
+  const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [vehicleNumber, setVehicleNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleAadhaarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setAadhaarFile(event.target.files);
-  };
+  function submitData(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    const driver = {
+      bikeOwnerName,
+      bikeModel,
+      aadhaarNumber,
+      vehicleNumber,
+      email,
+      password,
+    };
+    const db = getDatabase();
 
-  const handleRcFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setRcFile(event.target.files);
-  };
+    let newDriverId = push(child(ref(db), "drivers")).key;
 
-  const handleNocFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setNocFile(event.target.files);
-  };
+    let updates: any = {};
+    updates["/drivers/" + newDriverId] = driver;
+
+    return update(ref(db), updates)
+      .then(() => {
+        sessionStorage.setItem("currentDriverId", newDriverId as string);
+        window.alert("Registration Completed");
+        router.push("/driver_success");
+      })
+      .catch((error) => console.error(error));
+  }
 
   return (
     <>
@@ -30,7 +44,7 @@ const BikeDetailsForm = () => {
       </Head>
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold mb-4">Bike Details </h1>
-        <form className="max-w-md mx-auto">
+        <form className="max-w-md mx-auto" onSubmit={submitData}>
           <div className="mb-4">
             <label htmlFor="bikeOwnerName" className="block font-medium mb-2">
               Bike Owner Name
@@ -42,22 +56,6 @@ const BikeDetailsForm = () => {
               value={bikeOwnerName}
               onChange={(e) => setBikeOwnerName(e.target.value)}
             />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="bikeType" className="block font-medium mb-2">
-              Bike Type
-            </label>
-            <select
-              id="bikeType"
-              className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              defaultValue=""
-              onChange={(e) => setBikeType(e.target.value)}
-            >
-              <option value="">Select Bike Type</option>
-              <option value="electric">Electric Bike / Scooty</option>
-              <option value="scooty">Scooty</option>
-              <option value="normal">Bike</option>
-            </select>
           </div>
           <div className="mb-4">
             <label htmlFor="bikeModel" className="block font-medium mb-2">
@@ -72,45 +70,72 @@ const BikeDetailsForm = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="aadhaarFile" className="block font-medium mb-2">
-              Aadhaar Card
+            <label htmlFor="aadhaarNumber" className="block font-medium mb-2">
+              Aadhar Number
             </label>
             <input
-              id="aadhaarFile"
-              type="file"
+              id="aadhaarNumber"
+              type="number"
               className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              onChange={handleAadhaarFileChange}
+              value={aadhaarNumber}
+              onChange={(e) => setAadhaarNumber(e.target.value)}
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="rcFile" className="block font-medium mb-2">
-              RC Document
+            <label htmlFor="vehicleNumber" className="block font-medium mb-2">
+              Vehicle Number
             </label>
             <input
-              id="rcFile"
-              type="file"
+              id="vehicleNumber"
+              type="number"
               className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              onChange={handleRcFileChange}
+              value={vehicleNumber}
+              onChange={(e) => setVehicleNumber(e.target.value)}
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="nocFile" className="block font-medium mb-2">
-              NOC Document
-            </label>
-            <input
-              id="nocFile"
-              type="file"
-              className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              onChange={handleNocFileChange}
-            />
+
+          <div className="rounded-md shadow-sm">
+            <div className="mb-2">
+              <label
+                htmlFor="email"
+                className="block font-medium mb-2 text-gray-700"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                // required
+              />
+            </div>
+            <div className="mb-2">
+              <label
+                htmlFor="password"
+                className="block font-medium mb-2 text-gray-700"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                // required
+              />
+            </div>
           </div>
-          <div className="flex justify-center">
-            <Link
-              href="/nextdriverpage"
-              className="ml-auto bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
+
+          <div>
+            <button
+              type="submit"
+              className="w-full flex justify-center py-2 px-4 rounded font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Next
-            </Link>
+              Submit
+            </button>
           </div>
         </form>
       </div>
