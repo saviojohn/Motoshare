@@ -8,6 +8,7 @@ import {
   MapContainerProps,
 } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
+import { Link } from "react-router-dom";
 
 const DriverSuccessPage = () => {
   const [driverLocation, setDriverLocation] = useState<LatLngExpression | null>(
@@ -44,8 +45,11 @@ const DriverSuccessPage = () => {
     style: { height: "400px", width: "100%" },
   };
 
-  const handleReset = () => {
-    setDriverLocation(null);
+  // Profile button click handler
+  const handleProfileClick = () => {
+    // Navigate to the driver profile page
+    // Replace the path with the actual path to the driver profile page
+    window.location.href = "/driver-profile";
   };
 
   return (
@@ -59,6 +63,7 @@ const DriverSuccessPage = () => {
             src="/profile-icon.png"
             alt="Profile Icon"
             className="w-8 h-8 rounded-full float-right cursor-pointer"
+            onClick={handleProfileClick}
           />
           <div className="bg-gray-100 justify-center mt-[2rem] p-4 mb-[8rem]">
             <div className="text-gray-800 text-center">Popup message here</div>
@@ -78,9 +83,16 @@ const DriverSuccessPage = () => {
                   <Popup>Customer location</Popup>
                 </Marker>
               )}
+              {/* Profile button */}
+              <button className="absolute top-4 right-4">
+                <Link to="/driver-profile">Profile</Link>
+              </button>
             </MapContainer>
           )}
-          <button className="absolute bottom-4 right-4" onClick={handleReset}>
+          <button
+            className="absolute bottom-4 right-4"
+            onClick={() => setDriverLocation(null)}
+          >
             Reset
           </button>
         </div>
