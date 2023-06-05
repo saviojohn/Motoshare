@@ -2,6 +2,7 @@ import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const SignIn = () => {
   const router = useRouter();
@@ -10,8 +11,27 @@ const SignIn = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    // TODO: Implement sign-in logic
-    router.push("/");
+    signInWithEmailAndPassword(getAuth(), email, password)
+        .then((userCredential) => {
+          // Access the signed-in user
+          const user = userCredential.user;
+
+          // Retrieve the user's custom claims (roles)
+          return user.getIdTokenResult()
+              .then((idTokenResult) => {
+                if (idTokenResult.claims.driver) {
+                  // User is a driver
+                  router.push('/driver_success');
+                } else {
+                  // User is not a driver (assume rider)
+                  router.push('/nextcustomerpage');
+                }
+              });
+        })
+        .catch((error) => {
+          // Handle errors
+          console.error(error);
+        });
   };
 
   return (
