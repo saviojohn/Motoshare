@@ -1,106 +1,110 @@
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-const UploadDocs = () => {
+const SignupForm = () => {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
 
-  const handleUpload = (event: { preventDefault: () => void }) => {
+  const handleSignup = (event: { preventDefault: () => void }) => {
     event.preventDefault();
-    // handle the file upload here
-    // after the upload is complete, navigate to the new page
-    router.push("/driver_success_page");
+    if (password === confirmPassword) {
+      // handle the signup process here
+      router.push("/"); // redirect to index
+    } else {
+      setPasswordsMatch(false);
+    }
+  };
+
+  const handleEmailChange = (event: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    setPassword(event.target.value);
+    setPasswordsMatch(event.target.value === confirmPassword);
+  };
+
+  const handleConfirmPasswordChange = (event: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    setConfirmPassword(event.target.value);
+    setPasswordsMatch(event.target.value === password);
   };
 
   return (
     <>
       <Head>
-        <title>Upload Documents</title>
+        <title>Sign Up</title>
       </Head>
       <div className="bg-gray-100 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-
-          <form className="mt-8 space-y-6" onSubmit={handleUpload}>
+          <form className="mt-8 space-y-6" onSubmit={handleSignup}>
             <div className="rounded-md shadow-sm">
               <div className="mb-2">
                 <label
-                  htmlFor="bikeOwnerName"
-                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="email"
+                  className="block font-medium mb-2 text-gray-700"
                 >
-                  Bike Owner Name
+                  Email
                 </label>
                 <input
-                  id="bikeOwnerName"
-                  type="text"
-                  className="appearance-none w-full px-3 py-2 text-gray-700 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   // required
                 />
               </div>
               <div className="mb-2">
                 <label
-                  htmlFor="bikeOwnerAdharCard"
-                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="password"
+                  className="block font-medium mb-2 text-gray-700"
                 >
-                  Bike Owner Adhar Card
+                  Password
                 </label>
                 <input
-                  id="bikeOwnerAdharCard"
-                  type="file"
-                  className="appearance-none w-full px-3 py-2 text-gray-700 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   // required
                 />
               </div>
               <div className="mb-2">
                 <label
-                  htmlFor="currentBikeUser"
-                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="confirmPassword"
+                  className="block font-medium mb-2 text-gray-700"
                 >
-                  Current Bike User
+                  Confirm Password
                 </label>
                 <input
-                  id="currentBikeUser"
-                  type="text"
-                  className="appearance-none w-full px-3 py-2 text-gray-700 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={handleConfirmPasswordChange}
+                  className="w-full border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   // required
                 />
-              </div>
-              <div className="mb-2">
-                <label
-                  htmlFor="currentBikeUserAdharCard"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Current Bike User Adhar Card
-                </label>
-                <input
-                  id="currentBikeUserAdharCard"
-                  type="file"
-                  className="appearance-none w-full px-3 py-2 text-gray-700 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  // required
-                />
-              </div>
-              <div className="mb-6">
-                <label
-                  htmlFor="currentBikeUserLicence"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  Current Bike User Licence
-                </label>
-                <input
-                  id="currentBikeUserLicence"
-                  type="file"
-                  className="appearance-none w-full px-3 py-2 text-gray-700 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  // required
-                />
+                {!passwordsMatch && (
+                  <p className="text-red-500 mt-2">Passwords do not match.</p>
+                )}
               </div>
             </div>
 
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full flex justify-center py-2 px-4 rounded font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Submit
               </button>
@@ -112,4 +116,4 @@ const UploadDocs = () => {
   );
 };
 
-export default UploadDocs;
+export default SignupForm;
