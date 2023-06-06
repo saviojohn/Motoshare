@@ -214,7 +214,7 @@ const CustomerLocation = () => {
             </MapContainer>
             <div className="flex justify-center">
               <button
-                onClick={() => router.push("/customer-profile")}
+                onClick={() => router.push("/profile")}
                 className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
                 style={{ position: "absolute", top: "10px", right: "10px" }}
               >

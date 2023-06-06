@@ -28,7 +28,7 @@ function SignUpForm() {
 
                 // Set custom user type
                 return updateProfile(user, {
-                    displayName: userType,
+                    displayName: userType == 'driver'? 'driver': 'customer',
                 }).then(() => {
                     // User profile updated successfully
                     console.log('Custom user type added.');
@@ -55,8 +55,8 @@ function SignUpForm() {
                                         // Save driver details to the Firebase Realtime Database
                                         return update(ref(getDatabase()), {['drivers/' + user.uid]:driverDetails})
                                             .then(() => {
-                                                window.alert("You are registered successfully, lets look for customers :)");
-                                                router.push('/driver_success');
+                                                window.alert("You are registered successfully, please sign in :)");
+                                                router.push('/sign_in');
                                             });
 
                             });
@@ -72,8 +72,8 @@ function SignUpForm() {
 
                         return update(ref(getDatabase()), {['customers/' + user.uid]:riderDetails})
                             .then(() => {
-                                window.alert("You are registered successfully, lets book a ride :)");
-                                router.push('/nextcustomerpage');
+                                window.alert("You are registered successfully, please sign in :)");
+                                router.push('/sign_in');
                             });
                     }
                 })
@@ -180,7 +180,7 @@ function SignUpForm() {
                             value={userType}
                             onChange={(e) => setUserType(e.target.value)}
                         >
-                            <option value="rider">Rider</option>
+                            <option value="customer">Customer</option>
                             <option value="driver" >Driver</option>
                         </select>
                     </div>
