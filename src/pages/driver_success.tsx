@@ -1,6 +1,6 @@
 import UserInformation from "@/components/user.profile";
 import { getAuth } from "firebase/auth";
-import { child, getDatabase, onValue, push, ref, remove, update } from "firebase/database";
+import { child, get, getDatabase, onValue, push, ref, remove, update } from "firebase/database";
 import { useRouter } from "next/router";
 import React, { useState, ChangeEvent, useEffect } from "react";
 
@@ -8,6 +8,17 @@ const Driver_successForm = () => {
     const router = useRouter();
     const [userInfo, updateUserInfo] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [customerInfo, setCustomerInfo] = useState(null);
+    const [customerId, setCustomerId] = useState(null);
+    const [rideInfo, setRideInfo] = useState({});
+    const [otp, setOtp] = useState('');
+
+    const handleOtpSubmit = () => {
+        if(otp == rideInfo.otp) {
+            window.alert('otp confirmed, ride started');
+            router.push('/complete_ride?customer='+customerId);
+        }
+    };
 
     const handleOfflineClick = () => {
         setIsLoading(false);
@@ -38,11 +49,13 @@ const Driver_successForm = () => {
     function offerRides()
     {
         setIsLoading(true);
+        console.log('getting location');
         navigator.geolocation.getCurrentPosition(updateLocationdb);
     }
 
     function updateLocationdb(position: any)
     {
+        console.log('location acquired: '+position);
       const bikeOwnerId = getAuth().currentUser.uid;
         const driverlocation = {
           latitude: position.coords.latitude,
@@ -65,16 +78,37 @@ const Driver_successForm = () => {
     function pollForRides() {
         const db = getDatabase();
         const user = getAuth().currentUser;
-        const profile = ref(db, 'allotedRides/' + user.uid);
+        const profile = ref(db, 'activeRides/');
         onValue(profile, (snapshot) => {
             const data = snapshot.val();
-            updateAllotedRide(data);
+            if(data) {
+                Object?.entries(data).forEach(([key, details]) => {
+                    if(details.driver == user.uid) {
+                        setCustomerId(key);
+                        updateAllotedRide(key, details);
+                    }
+                });
+            }
         });
     }
 
-    function updateAllotedRide(data: any) {
+    async function updateAllotedRide(customerId: any, data: any) {
+        window.alert("ride alloted");
+        const db = getDatabase();
+        const bikeOwnerId = getAuth().currentUser.uid;
+        remove(ref(db, "/activeDriverLocations/" + bikeOwnerId))
+            .then(() => {
+                window.alert('you are offline now');
+            })
+            .catch((error) => {
+                console.error(error)
+            });
+        setIsLoading(false);
         if (data) {
-            window.alert("ride alloted");
+            let snapshot = await get(ref(db, 'customers/' + customerId));
+            const customer = snapshot.val();
+            setCustomerInfo(customer);
+            setRideInfo(data);
         }
     }
 
@@ -91,12 +125,12 @@ const Driver_successForm = () => {
             </div>
             <div className="container mx-auto">
                 <UserInformation userInfo={userInfo} />
-                {!isLoading && (<button style={{ float: 'right', margin: 5 }}
+                {!isLoading && !customerInfo ? (<button style={{ float: 'right', margin: 5 }}
                         onClick={offerRides}
                         className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
                 >
                     Offer Rides
-                </button>)}
+                </button>) : null}
                 {isLoading && (
                         <button
                             style={{ float: 'right', margin: 5 }}
@@ -115,6 +149,51 @@ const Driver_successForm = () => {
                     </div>
                 ) : null}
 
+                {!isLoading && customerInfo ? (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Customer Information</h2>
+                        <div className="mb-4">
+                            <label className="block mb-1">Name:</label>
+                            <p>{customerInfo.name}</p>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1">Phone Number:</label>
+                            <p>{customerInfo.phone}</p>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1">Fare:</label>
+                            <p>{rideInfo.fare}</p>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1">Pickup:</label>
+                            <p>{rideInfo.latitude},{rideInfo.longitude}</p>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1">Drop:</label>
+                            <p>{rideInfo.dropLatitude},{rideInfo.dropLongitude}</p>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1">OTP:</label>
+                            <input
+                                type="text"
+                                className="border border-gray-300 rounded px-4 py-2 w-40"
+                                value={otp}
+                                onChange={(event) => setOtp(event.target.value)}
+                                maxLength={6}
+                                minLength={6}
+                                pattern="[0-9]{6}"
+                                placeholder="Enter OTP"
+                                required
+                            />
+                        </div>
+                        <button
+                            className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 focus:outline-none"
+                            onClick={handleOtpSubmit}
+                        >
+                            Confirm Pickup
+                        </button>
+                    </div>
+                ) : null}
             </div>
         </div>
       );
