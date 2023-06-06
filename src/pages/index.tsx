@@ -23,14 +23,21 @@ const SelectUserType = () => {
           Customer
         </Link>
       </div>
-      <div className="mt-4">
-        <Link
-          href="/sign_in"
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          Sign In
-        </Link>
-      </div>
+        <br/>
+        <div className="flex flex-col md:flex-row gap-4">
+            <Link
+                href="/sign_in"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            >
+                Sign In
+            </Link>
+            <Link
+                href="/signupform"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            >
+                Sign Up
+            </Link>
+        </div>
     </div>
   );
 };

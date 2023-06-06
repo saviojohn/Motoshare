@@ -19,7 +19,7 @@ const SignIn = () => {
           // Retrieve the user's custom claims (roles)
           return user.getIdTokenResult()
               .then((idTokenResult) => {
-                if (idTokenResult.claims.driver) {
+                if (idTokenResult.claims.name == 'driver') {
                   // User is a driver
                   router.push('/driver_success');
                 } else {

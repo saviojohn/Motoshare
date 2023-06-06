@@ -12,6 +12,8 @@ import { addressAutocomplete } from "@/components/location-autocomplete";
 import { Link } from "react-router-dom";
 import { BrowserRouter as Router } from "react-router-dom";
 import { useRouter } from "next/router";
+import {get, getDatabase, ref, remove, update } from "firebase/database";
+import { getAuth } from "firebase/auth";
 
 interface CustomGeoapifyGeocoderAutocompleteOptions
   extends GeoapifyGeocoderAutocompleteOptions {
@@ -22,6 +24,7 @@ interface CustomGeoapifyGeocoderAutocompleteOptions
 
 const CustomerLocation = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [pickupLocation, setPickupLocation] = useState({
     label: "",
     coordinates: [0, 0] as [number, number],
@@ -69,6 +72,7 @@ const CustomerLocation = () => {
   }
 
   async function onRequestClick(e: any) {
+    setIsLoading(true);
     e.preventDefault();
     const url = `https://api.geoapify.com/v1/routing?waypoints=${dropLocation.coordinates[1]},${dropLocation.coordinates[0]}|${pickupLocation.coordinates[1]},${pickupLocation.coordinates[0]}&mode=drive&apiKey=6f0ae9a14f374257b6700c22d4ec7d92`;
     console.log(url);
@@ -77,11 +81,22 @@ const CustomerLocation = () => {
       const data = await response.json();
       console.log(data.features[0].properties.distance);
       const distance = data.features[0].properties.distance;
-      window.confirm(
-        `You will be travelling ${distance} metres. This would cost you ${
-          Math.ceil(distance / 1000) * 15
-        } INR. Would you like to confirm this ride?`
+      if (distance > 50000) {
+        window.alert("Sorry, we do not offer rides longer than 50km");
+        return;
+      }
+      const price = Math.ceil(distance / 1000) * 15;
+      const answer = window.confirm(
+        `You will be travelling ${distance} metres. This would cost you ${price} INR. Would you like to confirm this ride?`
       );
+      if(answer) {
+        const closestDriver = await findClosestDriver(...pickupLocation.coordinates);
+        if (closestDriver.length == 0) {
+          window.alert('We could not find a driver.');
+          return;
+        }
+        bookRide(...closestDriver, price, ...pickupLocation.coordinates, ...dropLocation.coordinates);
+      }
     }
   }
 
@@ -141,9 +156,112 @@ const CustomerLocation = () => {
     );
   }, []);
 
+  async function findClosestDriver(inputLon: number, inputLat: number) {
+    try {
+      const snapshot = await get(ref(getDatabase(), '/activeDriverLocations'));
+      const coordinates = snapshot.val();
+
+      console.log(coordinates);
+      let closestDistance = Infinity;
+      let closestCoordinates: number[] | null = null;
+
+      Object.entries(coordinates)
+          .forEach(([key, { latitude, longitude }]) => {
+            if(key != 'null') {
+              const distance = calculateDistance(inputLat, inputLon, latitude, longitude);
+              if (distance < closestDistance) {
+                closestDistance = distance;
+                closestCoordinates = [key, latitude, longitude];
+              }
+            }
+      });
+
+      return closestCoordinates ?? [];
+    } catch (error) {
+      console.error('Error finding closest coordinates:', error);
+      return [];
+    }
+  }
+
+
+  const calculateDistance = (
+      lat1: number,
+      lon1: number,
+      lat2: number,
+      lon2: number
+  ) => {
+    const earthRadius = 6371; // Radius of the Earth in kilometers
+    const degToRad = (deg: number) => deg * (Math.PI / 180);
+
+    const dLat = degToRad(lat2 - lat1);
+    const dLon = degToRad(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(degToRad(lat1)) *
+        Math.cos(degToRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = earthRadius * c; // Distance in kilometers
+    return distance;
+  };
+
+  function bookRide(driver: string, latitude: number, longitude: number, fare: number, pickupLongitude: number, pickupLatitude: number, dropLongitude: number, dropLatitude: number) {
+    const currentUser = getAuth().currentUser.uid;
+    const db = getDatabase();
+    remove(ref(db, "/activeDriverLocations/" + driver))
+        .then(() => {
+          const details = {
+            driver,
+            latitude: pickupLatitude,
+            longitude: pickupLongitude,
+            otp: generateOTP(),
+            fare,
+            dropLatitude,
+            dropLongitude
+          };
+
+          console.log(details);
+          // Save driver details to the Firebase Realtime Database
+          return update(ref(getDatabase()), {['activeRides/' + currentUser]:details})
+              .then(() => {
+                setIsLoading(false);
+                window.alert("We found you a driver :)");
+                router.push('/active_ride');
+              });
+        })
+        .catch((error) => {
+          console.error(error)
+        });
+  }
+
+  const generateOTP = (): string => {
+    const otpLength = 6;
+    let otp = '';
+
+    for (let i = 0; i < otpLength; i++) {
+      otp += Math.floor(Math.random() * 10).toString();
+    }
+
+    return otp;
+  };
+
+
   return (
     <div>
       <Router>
+        <div className="container mx-auto">
+          {isLoading ? (
+              <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+                <p className="ml-4">Looking for drivers...</p>
+              </div>
+          ) : null}
+
+        </div>
+
         <div className="container mx-auto px-4 py-6">
           <form className="max-w-md mx-auto">
             <div className="mb-4 flex flex-col justify-start items-start">
@@ -214,11 +332,18 @@ const CustomerLocation = () => {
             </MapContainer>
             <div className="flex justify-center">
               <button
-                onClick={() => router.push("/customer-profile")}
+                onClick={() => router.push("/profile")}
                 className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
                 style={{ position: "absolute", top: "10px", right: "10px" }}
               >
                 Profile
+              </button>
+              <button
+                  onClick={() => router.push("/active_ride")}
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline-blue active:bg-blue-600"
+                  style={{ position: "absolute", top: "10px", right: "10px" }}
+              >
+                Active Ride
               </button>
             </div>
           </div>
@@ -229,3 +354,6 @@ const CustomerLocation = () => {
 };
 
 export default CustomerLocation;
+
+
+
