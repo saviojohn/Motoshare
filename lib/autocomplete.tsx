@@ -85,6 +85,11 @@ const CustomerLocation = () => {
         window.alert("Sorry, we do not offer rides longer than 50km");
         return;
       }
+      const map = mapRef.current;
+      L.marker([pickupLocation.coordinates[0],pickupLocation.coordinates[1]]).addTo(map).bindPopup('Pickup Location');
+      L.marker([dropLocation.coordinates[0],dropLocation.coordinates[1]]).addTo(map).bindPopup('Drop-off Location');
+      const routePolyline = L.polyline([switchIndices(data.features[0].geometry.coordinates)], { color: 'blue' }).addTo(map);
+      map.fitBounds(routePolyline.getBounds());
       const price = Math.ceil(distance / 1000) * 15;
       const answer = window.confirm(
         `You will be travelling ${distance} metres. This would cost you ${price} INR. Would you like to confirm this ride?`
@@ -98,6 +103,10 @@ const CustomerLocation = () => {
         bookRide(...closestDriver, price, ...pickupLocation.coordinates, ...dropLocation.coordinates);
       }
     }
+  }
+
+  function switchIndices(array: [any, any][]): [any, any][] {
+    return array[0].map(([first, second]) => [second, first]);
   }
 
   const locationIcon = L.icon({
