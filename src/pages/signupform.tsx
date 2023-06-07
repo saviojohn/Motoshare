@@ -88,11 +88,24 @@ function SignUpForm() {
     return (
         <>
             <Head>
-                <title>Customer Form</title>
+                <title>Details</title>
             </Head>
             <div className="container mx-auto px-4 py-6">
-                <h1 className="text-3xl font-bold mb-4">Customer Form</h1>
+                <h1 className="text-3xl font-bold mb-4">Sign Up Form</h1>
                 <form onSubmit={handleSignUp}>
+
+                    <div className="mb-4">
+                        <label htmlFor="userType" className="block font-medium mb-2">User Type</label>
+                        <select
+                            id="userType"
+                            className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            value={userType}
+                            onChange={(e) => setUserType(e.target.value)}
+                        >
+                            <option value="customer">Customer</option>
+                            <option value="driver" >Driver</option>
+                        </select>
+                    </div>
 
                     <div className="mb-4">
                         <label htmlFor="name" className="block font-medium mb-2">Name</label>
@@ -169,19 +182,6 @@ function SignUpForm() {
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <div className="mb-4">
-                        <label htmlFor="userType" className="block font-medium mb-2">User Type</label>
-                        <select
-                            id="userType"
-                            className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            value={userType}
-                            onChange={(e) => setUserType(e.target.value)}
-                        >
-                            <option value="customer">Customer</option>
-                            <option value="driver" >Driver</option>
                         </select>
                     </div>
 
