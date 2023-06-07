@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import {get, getDatabase, ref, remove } from 'firebase/database';
+import {get, getDatabase, ref, remove, update } from 'firebase/database';
 import L from 'leaflet';
 import { useRouter } from 'next/router';
 import { getAuth } from 'firebase/auth';
@@ -54,7 +54,7 @@ const RideDetails: React.FC = () => {
         return array[0].map(([first, second]) => [second, first]);
     }
 
-    const handleCompleteRide = () => {
+    const handleCompleteRide = async () => {
         const confirmRideCompletion = window.confirm(
             `Are you sure you want to complete the trip?\nFare: ${rideInfo.fare}INR`
         );
@@ -63,10 +63,15 @@ const RideDetails: React.FC = () => {
             // Remove the current ride from the database
             const {customer} = router.query;
             const database = getDatabase();
-            const rideRef = ref(database, 'activeRides/'+customer); // Replace 'current' with your specific ride identifier
-            remove(rideRef);
-            window.alert("ride completed. looking for new customers");
-            router.push('/driver_success');
+            let snapshot = await get(ref(database, 'activeRides/' + customer));
+            const ride = snapshot.val();
+            update(ref(getDatabase()), {['completedRides/' + customer]:ride})
+                .then(() => {
+                    const rideRef = ref(database, 'activeRides/'+customer); // Replace 'current' with your specific ride identifier
+                    remove(rideRef);
+                    window.alert("ride completed. looking for new customers");
+                    router.push('/driver_success');
+                });
         }
     };
     return (
