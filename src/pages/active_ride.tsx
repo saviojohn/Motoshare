@@ -62,7 +62,7 @@ const ActiveRide = () => {
 
     return (
         <div>
-            {rideInfo.otp ? (<div className="bg-gray-100 py-8">
+            {rideInfo?.otp ? (<div className="bg-gray-100 py-8">
                 <div className="container mx-auto px-4">
                     <h2 className="text-2xl font-bold mb-4">Share OTP for the Ride</h2>
                     <div className="flex items-center justify-between">
