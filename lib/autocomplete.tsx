@@ -83,6 +83,7 @@ const CustomerLocation = () => {
       const distance = data.features[0].properties.distance;
       if (distance > 50000) {
         window.alert("Sorry, we do not offer rides longer than 50km");
+        setIsLoading(false);
         return;
       }
       const map = mapRef.current;
