@@ -34,7 +34,6 @@ const RideDetails: React.FC = () => {
                 .catch(() => {
                     const routePolyline = L.polyline([pickupLocation, dropLocation], { color: 'blue' }).addTo(map);
                     map.fitBounds(routePolyline.getBounds());
-
                 });
         }
         fetchData();
@@ -56,7 +55,7 @@ const RideDetails: React.FC = () => {
 
     const handleCompleteRide = async () => {
         const confirmRideCompletion = window.confirm(
-            `Are you sure you want to complete the trip?\nFare: ${rideInfo.fare}INR`
+            `Are you sure you want to complete the trip?\nFare: ${rideInfo.fare}INR. Please collect the fare in cash.`
         );
 
         if (confirmRideCompletion) {
