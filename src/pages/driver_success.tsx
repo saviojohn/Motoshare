@@ -165,12 +165,10 @@ const Driver_successForm = () => {
                             <p>{rideInfo.fare}</p>
                         </div>
                         <div className="mb-4">
-                            <label className="block mb-1">Pickup:</label>
-                            <p>{rideInfo.latitude},{rideInfo.longitude}</p>
-                        </div>
-                        <div className="mb-4">
-                            <label className="block mb-1">Drop:</label>
-                            <p>{rideInfo.dropLatitude},{rideInfo.dropLongitude}</p>
+                            <label className="block mb-1">Pick Up Location:</label>
+                            <p><a style={{ color: 'blue' }} href={"https://www.google.com/maps/dir/Current+Location/"+rideInfo.latitude+","+rideInfo.longitude} target="_blank">
+                            Open in Google Maps
+                            </a></p>
                         </div>
                         <div className="mb-4">
                             <label className="block mb-1">OTP:</label>
