@@ -17,6 +17,8 @@ const Driver_successForm = () => {
         if(otp == rideInfo.otp) {
             window.alert('otp confirmed, ride started');
             router.push('/complete_ride?customer='+customerId);
+        } else {
+            window.alert("otp did not match, sorry");
         }
     };
 
